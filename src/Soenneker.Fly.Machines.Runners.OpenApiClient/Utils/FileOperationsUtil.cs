@@ -56,23 +56,20 @@ public sealed class FileOperationsUtil : IFileOperationsUtil
     {
         string gitDirectory = await _gitUtil.CloneToTempDirectory($"https://github.com/soenneker/{Constants.Library.ToLowerInvariantFast()}", cancellationToken: cancellationToken);
 
-        string targetFilePath = Path.Combine(gitDirectory, "openapi.yaml");
         string jsonFilePath = Path.Combine(gitDirectory, "openapi.json");
         string fixedFilePath = Path.Combine(gitDirectory, "fixed.json");
 
-        await _fileUtil.DeleteIfExists(targetFilePath, cancellationToken: cancellationToken);
         await _fileUtil.DeleteIfExists(jsonFilePath, cancellationToken: cancellationToken);
         await _fileUtil.DeleteIfExists(fixedFilePath, cancellationToken: cancellationToken);
 
-        string openApiDocumentUrl = _configuration["Machines:ClientGenerationUrl"] ?? "https://raw.githubusercontent.com/togethercomputer/openapi/refs/heads/main/openapi.yaml";
+        string openApiDocumentUrl = _configuration["Machines:ClientGenerationUrl"] ?? "https://machines-api-spec.fly.dev/spec/openapi3.json";
 
         string? filePath = await _fileDownloadUtil.Download(openApiDocumentUrl,
-            targetFilePath, fileExtension: ".yaml", cancellationToken: cancellationToken);
+            jsonFilePath, fileExtension: ".json", cancellationToken: cancellationToken);
 
         if (string.IsNullOrWhiteSpace(filePath))
             throw new Exception("Fly Machines OpenAPI download did not produce a file path.");
 
-        await _yamlUtil.SaveAsJson(filePath, jsonFilePath, cancellationToken: cancellationToken);
         await _openApiFixer.Fix(jsonFilePath, fixedFilePath, cancellationToken);
 
         await _kiotaUtil.EnsureInstalled(cancellationToken);
