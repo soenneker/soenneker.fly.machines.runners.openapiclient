@@ -62,7 +62,7 @@ public sealed class FileOperationsUtil : IFileOperationsUtil
         await _fileUtil.DeleteIfExists(jsonFilePath, cancellationToken: cancellationToken);
         await _fileUtil.DeleteIfExists(fixedFilePath, cancellationToken: cancellationToken);
 
-        string openApiDocumentUrl = _configuration["Machines:ClientGenerationUrl"] ?? "https://machines-api-spec.fly.dev/spec/openapi3.json";
+        string openApiDocumentUrl = _configuration["Machines:ClientGenerationUrl"] ?? "https://docs.machines.dev/openapi.json";
 
         string? filePath = await _fileDownloadUtil.Download(openApiDocumentUrl,
             jsonFilePath, fileExtension: ".json", cancellationToken: cancellationToken);
